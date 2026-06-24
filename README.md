@@ -76,9 +76,9 @@ Three realistic one-click presets so you can try it without real client data:
 2. **Event Vendor Request** — a client wants help booking catering: dates, a budget, and several missing details.
 3. **Website Update Request** — a small-business owner asks for homepage changes, new pricing, and a launch date.
 
-## Limitations (this is a V1 / portfolio build)
+## Current limitations
 
-Single user, no login — assume it runs on your own machine. Not enterprise-grade storage. No OCR: scanned/image-only PDFs are *noted*, not read. Packets can't be edited after generation. Re-running a request creates a fresh Drive folder + tracker row (no de-duping).
+Single user, no login — it runs on your own machine. No OCR yet: scanned/image-only PDFs are *noted*, not read. Packets can't be edited after generation. Re-running a request creates a fresh Drive folder + tracker row (no de-duping).
 
 ## Future
 
