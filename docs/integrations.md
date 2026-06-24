@@ -1,5 +1,7 @@
 # Integration & Execution Architecture (Phase 8)
 
+Processing the lease-renewal request touches three outside systems: Claude reads it, Google Drive stores the lease and invoice files, and Google Sheets logs a tracker row. This doc defines how each one is wrapped in an adapter so that, say, Drive not being connected simply marks that step `skipped` — the Operator still gets the packet and PDF, and the job never fails because of one integration.
+
 No MCP, no policy-gating (out of scope). See also `tool-model.md`.
 
 ## 1. External systems

@@ -1,5 +1,7 @@
 # Deterministic vs Agentic Decomposition (Phase 6)
 
+When the lease-renewal email arrives, exactly one step is AI — Claude reading the message and files and returning structure. The other twelve steps are plain, predictable code: extracting text, validating the AI's output, scoring "needs attention," building the PDF, filing to Drive, logging the tracker row, saving the record. This doc draws that line and explains why the consequential parts (anything that flags, files, or writes) must stay deterministic and never be handed to the model.
+
 **Headline:** exactly **one** agentic node — the single Claude analysis call. Everything else is deterministic. The AI extracts content; it never decides control flow, computes the final attention flag, mutates external state, or formats artifacts.
 
 ## 1. Subsystems

@@ -1,57 +1,64 @@
 # Thesis & Boundary (Phase 0)
 
-## 1. Project thesis
-ActionPacket AI converts unstructured inbound work requests — a messy human message plus optional attachments — into a structured, validated, filed, and tracked artifact bundle ("action packet"). The AI does the messy comprehension (extract, classify, synthesize, draft). The deterministic core does everything consequential: assemble artifacts, score attention, write to external storage, log, persist. The value is collapsing "I got a vague request with attachments" into "here's exactly what's being asked, what to do, what's missing, a reply draft, and it's all filed and tracked" in under 60 seconds.
+## What this product is, in one breath
+A freelancer or small-business operator gets a vague request with attachments — "review the lease, confirm the $450 fee, send the signed copy by Friday." ActionPacket AI reads the message and the files and hands back a clear, structured packet — summary, tasks, deadline, risks, what's missing, and a ready-to-send reply — then files the documents into a Google Drive folder and logs the job in a tracker sheet. The understanding is done by Claude; the filing, tracking, flagging, and formatting are done by ordinary deterministic code.
 
-## 2. One-sentence product definition
+## 1. Project thesis
+The people this serves are the human triage point for inbound work. Requests arrive all day, half the information lives in attachments, deadlines are buried in prose, and details go unconfirmed. Doing this by hand is slow and error-prone — a missed Friday, an unconfirmed fee, a lost PDF.
+
+ActionPacket AI collapses "I got a messy request with files" into "here's exactly what's being asked, what to do, what's missing, a drafted reply, and it's all filed and tracked" — in under a minute. The AI does the messy comprehension (extract, classify, synthesize, draft). Everything consequential — assembling the artifacts, scoring what needs attention, writing to Drive and Sheets, persisting the record — stays deterministic, so the system is predictable and the AI never takes an action on the Operator's behalf.
+
+## 2. One-sentence definition
 ActionPacket AI turns a messy client request and its files into a structured, filed, and tracked action packet (summary, tasks, deadlines, risks, missing info, follow-up draft) with a Drive folder and a Sheets tracker row.
 
 ## 3. System boundary
 | Zone | Contents |
 |---|---|
-| **Inside (we build/own)** | Intake normalization, file text extraction, AI analysis call, Zod validation, deterministic attention scoring, Markdown assembly, PDF rendering, run persistence (SQLite), result + history surfaces, orchestration, graceful degradation. |
-| **Edge (external systems we write to)** | Anthropic API (inference), Google Drive (create folder + upload), Google Sheets (append row). |
-| **Outside (not crossed in V1)** | Sending email/messages, executing the requested work, calendar/task-manager sync, identity/auth, multi-tenant isolation, acting on the client's behalf beyond filing artifacts. |
+| **Inside (we own)** | Intake, file text extraction, the AI analysis call, validation, attention scoring, Markdown + PDF generation, persistence (SQLite), the result + history screens, orchestration, graceful degradation. |
+| **Edge (we write to)** | Anthropic API (reads the request, returns structure), Google Drive (creates a folder + uploads files), Google Sheets (appends a tracker row). |
+| **Outside (not in V1)** | Sending the email itself, doing the requested work, calendar/task-manager sync, logins/accounts, multi-tenant isolation, acting on the client's behalf beyond filing the artifacts. |
+
+The product **organizes and drafts**; it never **sends or executes**. The Operator stays in the loop for anything that leaves the building.
 
 ## 4. In-scope capabilities
-1. Multi-field intake form + multi-file upload.
-2. Text extraction: PDF (digital), TXT, MD; DOCX optional. No-text PDF → graceful "OCR not supported V1" note.
-3. Single AI analysis call → validated `ActionPacket` structured output.
-4. Deterministic attention scoring (overrides/supplements AI's `needsAttention`).
-5. Markdown packet + professional PDF.
-6. Drive folder creation + artifact upload.
-7. Sheets tracker append.
-8. Live streamed workflow-step progress.
-9. Result surface (preview, metadata, copy follow-up, download PDF, integration status).
-10. History surface (SQLite-backed).
+1. An intake form + multi-file upload (the messy message + its attachments).
+2. Text extraction from PDF / TXT / MD (DOCX optional). A scanned PDF with no text is *noted* ("OCR not supported in V1"), not treated as a failure.
+3. One Claude call returning a validated, structured `ActionPacket`.
+4. Deterministic "needs attention" scoring.
+5. A Markdown packet + a polished PDF.
+6. A dated Google Drive folder with the originals + generated artifacts.
+7. A Google Sheets tracker row per request.
+8. Live progress shown step-by-step while it runs.
+9. A result screen (preview, metadata, copy-the-reply, download-the-PDF, integration status).
+10. A history screen of past packets.
 11. Three one-click demo scenarios.
-12. Graceful degradation: packet + PDF always produced even if Drive/Sheets/creds fail.
+12. Graceful degradation — the packet + PDF are always produced even if Google is off or fails.
 
 ## 5. Non-goals (V1)
-Auth/multi-user · payments · team permissions/roles · approval chains · chat interface · vector search/RAG · OCR · multi-agent orchestration · autonomous task execution · email/calendar/Jira/Linear/Gmail integration · editing a packet after generation.
+Logins / multi-user · payments · team roles · approval chains · a chat interface · vector search · OCR · multi-agent orchestration · doing the work autonomously · email/calendar/Jira/Linear integration · editing a packet after it's generated.
 
-## 6. Primary user roles
-One role: **Operator** (freelancer / consultant / small-biz operator / project coordinator). Sees everything, does everything, no gating. (Role/permission/authority and approval models collapse to a single local actor — see `role-model.md`.)
+## 6. Who uses it
+One role, the **Operator**: a freelancer, consultant, small-business operator, or project coordinator running the app for themselves. No second role, no permissions — see `role-model.md`.
 
-## 7. Highest-stakes actions
-| # | Action | Why high-stakes | V1 control |
+## 7. The four highest-stakes actions
+| # | Action | Why it matters | How V1 keeps it safe |
 |---|---|---|---|
-| S1 | Write folder + files to the Operator's real Google Drive | External mutation of user's account | Least-privilege `drive.file` (app only touches files it creates); never deletes |
-| S2 | Append a row to the Operator's Sheets tracker | External mutation | Append-only; never edits/deletes existing rows |
-| S3 | Generate a client-facing follow-up draft | Reputational risk if tone/facts wrong | Draft only — never auto-sent; human copies + sends; prompt forbids inventing facts |
-| S4 | Assert extracted deadlines / dollar amounts | Operator may act on a wrong fact | Prompt: preserve-vague, no hallucination, unknowns → missing-info; `evidence` field; confidence surfaced |
+| S1 | Writing a folder + files to the Operator's real Google Drive | It mutates their actual account | Scoped to `drive.file` (the app only ever touches files it created); never deletes |
+| S2 | Appending a row to their tracker sheet | Mutates their data | Append-only; never edits or deletes existing rows |
+| S3 | Drafting a client-facing reply | Wrong tone or a made-up fact is embarrassing | Draft only — never auto-sent; the Operator copies and sends; the prompt forbids inventing facts |
+| S4 | Stating a deadline or dollar figure pulled from a document | The Operator might act on a wrong number | The prompt preserves vague dates verbatim, never invents, routes unknowns to "missing info," attaches the source quote as evidence, and surfaces a confidence score |
 
-## 8. Why this system needs AI
-The load-bearing tasks are irreducibly fuzzy: comprehending free-text intent, classifying request type, decomposing into tasks, inferring (not inventing) deadlines, spotting risks/ambiguities, identifying what's missing, drafting a professional reply. No deterministic ruleset handles arbitrary client prose. Everything around that comprehension is deterministic.
+## 8. Why this genuinely needs AI
+The hard part is irreducibly fuzzy: understanding free-text intent, classifying the request, breaking it into tasks, spotting that "by Friday" is a deadline and the "$450 fee" is unconfirmed, noticing nobody said who signs, and drafting a professional reply. No set of rules handles arbitrary client prose. Everything *around* that comprehension — and there's a lot of it — is deterministic.
 
-## 9. What must remain deterministic
-File handling (limits, sanitization, type detection, temp storage) · validation gate (Zod before any consumer) · attention scoring · artifact assembly (Markdown + PDF templates) · external writes (Drive/Sheets + auth) · persistence (run records, status, links) · orchestration + degradation.
+## 9. What must stay deterministic
+File handling (limits, sanitization, type detection) · the validation gate (the AI's output is checked against a strict schema before anything uses it) · attention scoring · Markdown + PDF assembly · the Drive and Sheets writes · persistence · orchestration and degradation.
 
 ## 10. First-pass workflow inventory
 | ID | Workflow | Trigger | Risk |
 |---|---|---|---|
-| W1 | Generate Action Packet (core pipeline) | Operator submits form | High (S1–S4) |
-| W2 | View Result | Open `/result/{id}` | Low |
-| W3 | Browse History | Open `/history` | Low |
-| W4 | Load Demo Scenario | Click demo button | None |
-| W5 | Download PDF | Click download | Low |
+| W1 | Generate Action Packet (the core pipeline) | Operator submits the form | High (S1–S4) |
+| W2 | View a result | Open `/result/{id}` | Low |
+| W3 | Browse history | Open `/history` | Low |
+| W4 | Load a demo scenario | Click a demo button | None |
+| W5 | Download the PDF | Click download | Low |

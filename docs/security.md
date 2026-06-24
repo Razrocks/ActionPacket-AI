@@ -1,5 +1,7 @@
 # Security, Secrets & Access (Phase 11)
 
+The lease and invoice PDFs are the Operator's private documents, and the keys that file them to Drive are powerful. This doc keeps every secret server-only (never shipped to the browser), scopes Google access so the app can only ever touch files it created, and treats every uploaded file as untrusted input — validated, size-limited, and never executed. It also names the one real safety property of the AI step: because the model has no tools, a malicious instruction hidden in a file can at worst produce a misleading packet, never an action.
+
 Governance/admin/policy-mutation dropped; secrets + trust boundaries + upload safety kept.
 
 ## 1. Trust-boundary map

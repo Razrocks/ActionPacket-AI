@@ -1,5 +1,7 @@
 # Workflows — Inventory & Contracts (Phase 5)
 
+The Operator can do five things in this app, but only one carries real weight: **W1**, the click that turns the lease-renewal email into a filed, tracked packet. The contract below spells out exactly what W1 does at each step and how it behaves when things go sideways — Google isn't connected, a PDF won't open, or Claude declines. The other four workflows (viewing a result, browsing history, loading a demo, downloading the PDF) are thin by comparison.
+
 Approval/policy/audit checkpoints are dropped (out of scope). Failure + degradation are kept.
 
 ## Inventory

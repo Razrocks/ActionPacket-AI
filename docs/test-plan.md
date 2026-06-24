@@ -1,5 +1,7 @@
 # Test & Demo Plan (Phase 16)
 
+How we prove it works and show it off. The three demo scenarios — lease renewal, event vendor, website update — are the backbone of both testing and demoing. Because the AI's exact wording varies, tests assert the *guarantees* (the packet always validates against the schema, the Friday deadline is captured, the reply draft is non-empty) rather than pinning specific sentences.
+
 No policy/approval/governance tests (out of scope).
 
 ## 1. Test strategy

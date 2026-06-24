@@ -1,5 +1,7 @@
 # Environment & Deployment (Phase 13)
 
+How to actually run this. Locally, an Anthropic key is all you need — the lease-renewal demo works end to end with no Google setup at all (Drive/Sheets just show `skipped`). In tests the AI is mocked so nothing hits the network. This doc covers those environments and what would change to host it somewhere real.
+
 ## 1. Environment model
 Three environments: **local** (primary build/demo target), **test** (automated, no live external calls), **prod-like** (documented, not a V1 build target).
 

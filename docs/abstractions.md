@@ -1,5 +1,7 @@
 # Primitives & Abstractions (Phase 3)
 
+This separates the small, indivisible values the system passes around (a confidence score, a deadline's due-date, a step-event token) from the composed structures built out of them (the whole Action Packet, a saved run, the final result returned to the screen). The point is discipline: only build an abstraction when it's genuinely load-bearing. For the lease-renewal request, the load-bearing abstraction is the **ActionPacket** — every downstream step (attention scoring, the PDF, the tracker row, the result page) reads from it. The load-bearing primitives are the fields that drive decisions: `needsAttention`, `priority`, `mainDeadline` ("Friday"), `confidence`. Section 7 lists the tempting-but-pointless abstractions we deliberately did **not** build.
+
 ## 1. What counts as a primitive
 A smallest load-bearing value with no internal parts: a scalar field, an enum value, a single env var, one file buffer, one step-event token.
 

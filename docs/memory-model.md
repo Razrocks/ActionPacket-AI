@@ -1,5 +1,7 @@
 # Memory Model (Phase 7)
 
+Every request is handled from scratch. Generating the packet for the lease-renewal email doesn't draw on any earlier request, and it leaves no AI "memory" behind. The only thing that persists is the saved **history record** in SQLite — durable state, not model context. This doc fixes that distinction so nobody mistakes the history table for something the AI reads back in.
+
 ## Buckets
 | Bucket | Contents | Notes |
 |---|---|---|

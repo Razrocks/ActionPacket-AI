@@ -1,5 +1,7 @@
 # Runtime & Infrastructure Topology (Phase 10)
 
+One Next.js process does the whole job. When the lease-renewal request is submitted, a single long-lived streaming request runs the entire pipeline in-process and pushes the live progress steps back to the browser — no queue, no worker, no separate services. This doc lists the moving parts, which calls are sync vs async, and what is deliberately *not* split out until real load forces it.
+
 ## 1. Components
 | # | Component | Kind |
 |---|---|---|

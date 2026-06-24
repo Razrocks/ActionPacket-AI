@@ -1,52 +1,89 @@
 # ActionPacket AI
 
-Turn a messy client request and its files into a **structured, filed, and tracked action packet** — summary, tasks, deadlines, risks, missing info, and a ready-to-send follow-up draft — plus a generated PDF, an organized Google Drive folder, and a Google Sheets tracker row.
+**Paste a messy client request, drop in the attachments, hit Generate — get back a clear action packet: what they're asking, what you need to do, the deadline, what's risky, what's missing, and a ready-to-send reply. Everything is filed to a Google Drive folder and logged in a tracker sheet automatically.**
 
-> ActionPacket AI demonstrates end-to-end AI workflow automation: unstructured intake, document parsing, Claude-powered structured extraction, artifact generation, Google Drive organization, and Google Sheets tracking.
+---
 
-## Why it exists
-Freelancers, consultants, and ops people get vague inbound requests with attachments and must quickly figure out: what's being asked, what to do, what the deadlines are, what's risky or missing, and what to reply. ActionPacket AI collapses that into a single structured packet in under 60 seconds.
+## The problem it solves
 
-## What it does
-1. Operator pastes a messy request + (optionally) uploads files.
-2. Text is extracted server-side (PDF/TXT/MD; DOCX optional).
-3. **One** Claude call extracts a validated `ActionPacket` (structured output via Zod).
-4. Deterministic rules compute a "needs attention" flag.
-5. A Markdown packet + polished PDF are generated.
-6. A Google Drive folder is created and artifacts + originals uploaded.
-7. A Google Sheets tracker row is appended.
-8. A Result page shows everything; History lists past runs.
+If you're a freelancer, consultant, or the ops person at a small company, you *are* the inbox. Requests land all day — email, Slack, DMs — and they look like this:
 
-If Google isn't configured (or fails), the packet + PDF are still produced and the integrations are marked `skipped`/`failed` — the app never collapses on one integration.
+> "Hi, I attached the lease renewal and invoice. Can you review this and send the signed copy by Friday? Also confirm whether the $450 setup fee is included. Let me know if anything is missing."
+>
+> *Attached: lease-renewal.pdf, invoice.pdf*
+
+That one message is deceptively heavy. To handle it you have to: open both PDFs, work out what's actually being asked, notice the Friday deadline, catch that the $450 fee is *unconfirmed*, realize nobody said **who** is allowed to sign, write a professional reply, save the files somewhere sensible, and log it so it doesn't fall through the cracks. Do that thirty times a week and things get dropped — a deadline missed, a fee never confirmed, a document lost in Downloads.
+
+**ActionPacket AI does that triage for you in about 30 seconds.**
+
+## What you get back
+
+Paste the message above, attach the two PDFs, click **Generate**. The result:
+
+- **Summary** — "The client sent a lease renewal and invoice. They need confirmation on whether the $450 setup fee is included and want the signed copy back by Friday."
+- **Tasks** — review the lease renewal · confirm whether the $450 setup fee is included · confirm who's authorized to sign · send the signed copy by Friday · reply to the client.
+- **Deadline** — *Signed copy due Friday* (flagged).
+- **Risks** — the setup fee may not be clearly stated; the signing authority is unclear.
+- **Missing information** — Who should sign? Return by email or post? Is the $450 fee one-time or recurring?
+- **Follow-up draft** — a polished reply you can copy and send as-is.
+- **Metadata** — priority, packet type, a confidence score, and a **Needs attention** flag (this one trips it: a near deadline + unconfirmed money + unclear authority).
+
+Then, without you doing anything else, it:
+
+- creates a **Google Drive folder** — `ActionPacket AI / {Client} - {Request} - {date}` — and drops in the original files, a PDF of the packet, the Markdown, and a `metadata.json`;
+- appends a **row to your Google Sheets tracker** so you have a running log of every request, its deadline, and its status.
+
+If you haven't connected Google, you still get the packet and the PDF — those steps just show as *skipped*. The app never dies because one integration is off.
+
+## Who it's for
+
+Freelancers, consultants, small-business operators, project coordinators, virtual assistants — anyone who is the human triage point for messy client/customer requests and needs to understand and act on them fast without losing track.
+
+## How it works (the pipeline)
+
+```
+Your request + files
+   ─▶ extract text from the files (PDF / TXT / MD)
+   ─▶ Claude reads it all and returns a structured packet (validated against a strict schema)
+   ─▶ deterministic rules flag "needs attention"
+   ─▶ generate Markdown + a polished PDF
+   ─▶ create the Drive folder + upload everything
+   ─▶ append the tracker row
+   ─▶ show you the result, and save it to history
+```
+
+Exactly **one** AI step (the reading/understanding). Everything consequential — filing, tracking, flagging, formatting — is plain deterministic code, so it's predictable and the AI can't take an action on your behalf.
 
 ## Tech stack
-Next.js (App Router, TypeScript) · Tailwind + shadcn/ui · Anthropic SDK (`messages.parse` + `zodOutputFormat`, adaptive thinking) · Zod · googleapis (Drive v3 + Sheets v4, OAuth refresh-token) · better-sqlite3 · Puppeteer + marked · pdf-parse (+ mammoth optional).
 
-## Architecture (one line)
-Modular monolith. Exactly **one agentic node** (the analysis call) fenced by a Zod validation gate; everything else — file handling, attention scoring, artifact assembly, external writes, persistence, orchestration — is deterministic. External writes are best-effort and degradable.
-
-```
-Intake ─▶ Extract ─▶ [AI analyze] ─▶ Zod gate ─▶ Attention ─▶ Markdown ─▶ PDF ─▶ Drive ─▶ Sheets ─▶ Persist
-          deterministic   agentic      trust boundary            deterministic + degradable tail
-```
+Next.js (App Router, TypeScript) · Tailwind + shadcn/ui · Anthropic SDK (structured output via Zod) · googleapis (Drive + Sheets, OAuth) · better-sqlite3 · Puppeteer (PDF) · pdf-parse.
 
 ## Setup
-1. `npm install`
-2. Copy `.env.example` → `.env.local`; set `ANTHROPIC_API_KEY`.
-3. (Optional, for Google) run `npm run auth:google` once to mint a refresh token; paste the printed values into `.env.local`.
-4. `npm run dev` → http://localhost:3000
 
-## Environment variables
-See `.env.example`. Secrets are server-only (never `NEXT_PUBLIC_*`). Required: `ANTHROPIC_API_KEY`. Optional (enables Drive+Sheets): `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GOOGLE_DRIVE_ROOT_FOLDER_ID`, `GOOGLE_SHEETS_ID`.
+```bash
+npm install
+cp .env.example .env.local      # set ANTHROPIC_API_KEY
+npm run dev                     # http://localhost:3000
+```
+
+Google Drive/Sheets are optional. To enable them, run `npm run auth:google` once to authorize your account and paste the printed values into `.env.local`. Required env: `ANTHROPIC_API_KEY`. Optional (enables filing + tracking): the `GOOGLE_OAUTH_*` vars. Secrets are server-only — never exposed to the browser.
 
 ## Demo scenarios
-Three one-click presets (no real files needed): **Lease Renewal**, **Event Vendor Request**, **Website Update Request**.
 
-## Planning docs
-This project was planned with a reusable planning OS. Full design pack in [`docs/`](docs/): thesis, ontologies, workflow contracts, deterministic/agentic decomposition, skill contract, integrations, data/runtime/security/observability/environment/capacity architecture, the vertical slice, the test plan, and the implementation phases. The single AI skill spec is in [`skills/analyze-request/skill.md`](skills/analyze-request/skill.md).
+Three realistic one-click presets so you can try it without real client data:
 
-## Limitations (V1)
-Single user, no auth. Demo application — not enterprise-grade secure storage. No OCR (scanned/image-only PDFs are noted, not read). No edit/regenerate of a packet. Re-running creates a new Drive folder + Sheets row (no dedupe).
+1. **Lease Renewal** — the example above (contract + invoice, Friday deadline, unconfirmed fee).
+2. **Event Vendor Request** — a client wants help booking catering: dates, a budget, and several missing details.
+3. **Website Update Request** — a small-business owner asks for homepage changes, new pricing, and a launch date.
 
-## Future improvements
-OCR · multi-user + auth · editable/regenerate packets · email send of the follow-up · token-count preflight + chunking for large docs · background-job model for concurrency · deploy to a persistent Node host.
+## Limitations (this is a V1 / portfolio build)
+
+Single user, no login — assume it runs on your own machine. Not enterprise-grade storage. No OCR: scanned/image-only PDFs are *noted*, not read. Packets can't be edited after generation. Re-running a request creates a fresh Drive folder + tracker row (no de-duping).
+
+## Future
+
+OCR for scanned documents · send the follow-up by email directly · editable / re-generatable packets · multi-user with login · large-document chunking · deploy to a always-on host.
+
+## Design docs
+
+This was planned before it was built. The full design pack lives in [`docs/`](docs/) — start with [`docs/thesis.md`](docs/thesis.md) for what the product is and [`docs/business-ontology.md`](docs/business-ontology.md) for the exact vocabulary. The single AI step is specified in [`skills/analyze-request/skill.md`](skills/analyze-request/skill.md).

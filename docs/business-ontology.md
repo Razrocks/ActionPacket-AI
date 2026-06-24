@@ -1,79 +1,81 @@
 # Business Ontology (Phase 1)
 
-Canonical vocabulary that humans and the AI both rely on.
+This document fixes the words everyone — the team and the AI — uses for this product, so the same thing never gets two names. It's grounded in the one job the product does: turning a message like this into something structured and actionable.
 
-## 1. Principles
-- One term, one meaning. Input, process, and output get distinct names.
-- The AI produces *content*; the system produces *records and artifacts*. Vocabulary keeps those separate.
-- Governance verbs (approve, escalate, remediate, resolve) are **not** in this product's ontology.
+## The running example
 
-## 2. Canonical entities
-Request · Attachment · Generation (Run) · Action Packet · Task · Deadline · Risk · Missing-Info Item · Follow-Up Draft · Recommended Next Step · File Note · Artifact · Drive Folder · Tracker Row · Operator · Demo Scenario.
+Throughout this doc we refer to one real request:
 
-## 3. Entity definitions
-| Entity | Definition | Kind |
+> **From a client, to a freelance operations consultant:**
+> "Hi, I attached the lease renewal and invoice. Can you review this and send the signed copy by Friday? Also confirm whether the $450 setup fee is included. Let me know if anything is missing."
+> *Attached: `lease-renewal.pdf`, `invoice.pdf`*
+
+Every entity below is illustrated with what it means *for this exact request*.
+
+## Why the vocabulary matters
+
+Three different things in this product are easy to call by the same loose word "the request": the **message the client sent**, the **act of processing it**, and the **structured result**. They are not the same, and conflating them causes bugs and confused UI copy. So: the client's message is a **Request**, processing it once is a **Generation**, and the structured result is an **Action Packet**. Hold that distinction and the rest follows.
+
+A second rule: the AI produces *content* (the summary, the tasks, the draft reply). The system produces *records and artifacts* (the saved run, the PDF, the Drive folder, the tracker row). The vocabulary keeps those two worlds separate, because the content is a best-effort reading that must be reviewed, while the records are facts the system is responsible for.
+
+## Entities, with concrete examples
+
+| Entity | What it is | In the running example |
 |---|---|---|
-| **Operator** | The sole human user. Submits, reviews, copies, downloads. | Actor |
-| **Request** | Raw inbound input: message text + intake metadata (title, requester, project, priority?, deadline?) + attachments. | Input |
-| **Attachment** (Source File) | An Operator-uploaded file (PDF/TXT/MD/DOCX). Input; never confused with Artifact. | Input |
-| **Generation** (Run) | One execution of the pipeline over one Request, and its durable record. Unit of history. *Internal name: Run.* | Process+Record |
-| **Action Packet** | The structured, validated output content derived from a Request. 1:1 with a Generation. | Output content |
-| **Task** | A discrete thing the Operator (or named owner) must do, extracted by AI. ≠ pipeline stage. | Packet element |
-| **Deadline** | A time commitment detected in the source, optional `dueDate` + `evidence`. Vague stays vague. | Packet element |
-| **Risk** | An ambiguity/hazard with `severity` + explanation. | Packet element |
-| **Missing-Info Item** | A specific unknown to chase before acting. | Packet element |
-| **Follow-Up Draft** | One professional reply draft the Operator may copy + send. Never auto-sent. | Packet element |
-| **Recommended Next Step** | A suggested action ordering, advisory. | Packet element |
-| **File Note** | AI's per-file observation (inferred type, relevant details, or "unreadable/OCR-not-supported"). | Packet element |
-| **Artifact** | A generated file: `action-packet.pdf`, `action-packet.md`, `metadata.json`, copied originals, `original-request.txt`. Output. | Output file |
-| **Drive Folder** | External container in the Operator's Drive holding Artifacts + Attachments for one Generation. | External record |
-| **Tracker Row** | One append-only row in the Operator's Sheet summarizing one Generation. | External record |
-| **Demo Scenario** | A canned Request preset (no real files) for instant demoing. | Fixture |
+| **Operator** | The person using the app — the freelancer/consultant/ops person doing the triage. | The consultant who received the email. |
+| **Requester** | The person who *sent* the message. Not the Operator. | The client. |
+| **Request** | The raw inbound thing to be processed: the message text plus intake details (title, who it's from, project, optional priority/deadline) plus any attached files. | The lease email + the two PDFs + "title: Lease renewal review". |
+| **Attachment** | A file the Operator uploaded as part of the Request. An *input*. | `lease-renewal.pdf`, `invoice.pdf`. |
+| **Generation** (internally: *Run*) | One pass of the pipeline over one Request, and the saved record of that pass. The unit you see in History. | The single click of "Generate" on this email, and its saved row. |
+| **Action Packet** | The structured, validated result of a Generation — the whole point of the product. One per Generation. | Everything the app hands back for this email (below). |
+| **Summary** | A plain-language restatement of what's going on. | "Client sent a lease renewal and invoice; needs the $450 setup fee confirmed and the signed copy back by Friday." |
+| **Task** | One concrete thing the Operator must *do*, pulled out of the Request. | "Confirm whether the $450 setup fee is included in the invoice or agreement." |
+| **Deadline** | A time commitment found in the source, kept exactly as stated, with the supporting quote. | label: "Signed copy due", dueDate: "Friday", evidence: "send the signed copy by Friday". |
+| **Risk** | An ambiguity or hazard that could bite the Operator, with a severity. | "The $450 setup fee may not be clearly stated anywhere" (medium). |
+| **Missing-Info Item** | A specific unknown the Operator should chase *before* acting. | "Who is authorized to sign the renewal?" |
+| **Follow-Up Draft** | A single professional reply the Operator can copy and send. Never sent automatically. | The drafted "Thanks for sending this over — I'll review and confirm before Friday…" reply. |
+| **Recommended Next Step** | A suggested ordering of what to do next. Advisory. | "Reply to the client confirming receipt and asking who should sign." |
+| **File Note** | The AI's note about a specific attachment — what it appears to be, key details, or that it couldn't be read. | "`invoice.pdf` — invoice; shows a $450 line item labeled 'setup'." |
+| **Artifact** | A file the system *generates*: the packet PDF, the Markdown, `metadata.json`, a copy of the original request text. An *output* (never confused with an Attachment). | `action-packet.pdf`, `action-packet.md`, `metadata.json`. |
+| **Drive Folder** | The Google Drive folder the system creates to hold this Generation's Artifacts and Attachments. | `ActionPacket AI / Client - Lease renewal review - 2026-06-24`. |
+| **Tracker Row** | One row appended to the Operator's Google Sheet summarizing this Generation. | A line: title, client, packet type, priority, "Friday", needs-attention = yes, confidence, Drive link. |
+| **Demo Scenario** | A canned Request (no real files) so the app can be tried instantly. | The "Lease Renewal" preset is this example. |
 
-## 4. State models
+## Scalars on the Action Packet
+These describe the packet as a whole and drive the UI badges, the tracker row, and the attention logic:
+- **Packet Type** — which kind of request this is. For the example: `contract_or_agreement`.
+- **Priority** — `low` / `medium` / `high` / `urgent`. Here: `high` (money + near deadline).
+- **Confidence** — the AI's own 0–1 rating of how complete and unambiguous the input was. ~0.84 here.
+- **Needs Attention** — a true/false flag meaning "don't autopilot this." True here, because the deadline is near, money is unconfirmed, and signing authority is unknown.
+
+## State models
 | Entity | States | Notes |
 |---|---|---|
-| **Generation (Run)** | `created → extracting → analyzing → assembling → filing → tracking → completed` ; or `failed` | Streamed live. Persisted terminal status: `completed`/`failed`. |
-| **Integration outcome** (Drive, Sheets each) | `ok` \| `skipped` (not configured) \| `failed` (errored) | Independent; never aborts the Run. |
-| **Action Packet** | `generated` (immutable) | No edit/regenerate in V1. |
-| **Request** | `drafting → submitted` | Not persisted independently; lives inside the Generation. |
-| **Attention** | `needsAttention: true \| false` | Derived (AI value OR deterministic rules). |
+| **Generation (Run)** | `created → extracting → analyzing → assembling → filing → tracking → completed` ; or `failed` | These are streamed to the screen live as progress steps. The saved record ends `completed` or `failed`. |
+| **Integration outcome** (Drive, Sheets — each) | `ok` \| `skipped` (not connected) \| `failed` (errored) | Independent. A skip or failure never aborts the Generation — you still get the packet + PDF. |
+| **Action Packet** | `generated` (immutable) | No editing or re-generating in V1. |
+| **Request** | `drafting → submitted` | Lives inside the Generation; not stored on its own. |
+| **Attention** | `needsAttention: true \| false` | Derived from the packet, never set by hand. |
 
-## 5. Relationship map
+## Relationship map
 ```
-Operator ──submits──▶ Request ──(1:n)──▶ Attachment
-Request  ──produces─▶ Generation (1:1) ──yields──▶ Action Packet (1:1)
-Action Packet ──contains──▶ Task[] · Deadline[] · Risk[] · MissingInfoItem[]
-                          · RecommendedNextStep[] · FileNote[] · FollowUpDraft(1)
-                          + scalars: packetType, priority, confidence,
-                            needsAttention, summary, requester?, projectName?, mainDeadline?
-Generation ──creates──▶ Artifact[]  (pdf, md, metadata.json, original-request.txt)
-Generation ──creates(0..1)──▶ Drive Folder ──holds──▶ Artifact[] + Attachment[] copies
-Generation ──appends(0..1)──▶ Tracker Row
-Generation ──persisted as──▶ WorkflowRun record (SQLite)
-Demo Scenario ──prefills──▶ Request
+Operator ──submits──▶ Request ──(has)──▶ Attachment(s)
+Request  ──processed by──▶ Generation (1:1) ──produces──▶ Action Packet (1:1)
+Action Packet ──made of──▶ Summary · Task[] · Deadline[] · Risk[] · MissingInfoItem[]
+                         · RecommendedNextStep[] · FileNote[] · FollowUpDraft
+                         + scalars (packetType, priority, confidence, needsAttention, …)
+Generation ──creates──▶ Artifact(s)  ──and (if Google connected)──▶ Drive Folder + Tracker Row
+Generation ──saved as──▶ a History record
+Demo Scenario ──fills in──▶ a Request
 ```
 
-## 6. Ambiguous terms → chosen meanings
-| Term | Chosen meaning | Don't |
-|---|---|---|
-| Request / Generation / Packet | input / execution+record / output content | use interchangeably |
-| Task | Operator to-do inside a Packet | call pipeline stages "tasks" |
-| Stage / Step | internal pipeline phase | call these "tasks" |
-| Deadline vs Main Deadline | all detected vs the single headline one (earliest/most-salient) | — |
-| Attachment vs Artifact | uploaded input vs generated output | conflate |
-| Requester vs Operator | message sender vs app user | say "client" loosely |
-| Confidence | AI self-rating 0–1 of extraction quality | treat as correctness guarantee |
-| Status | always namespaced: Run / Drive / Sheet | use bare "status" |
+## Terms we deliberately don't use (and why)
+- **"agent"** — there's no agent here, just one AI call that returns structured data. Calling it an agent implies autonomy it doesn't have.
+- **"approval", "escalation", "policy", "resolution"** — this product has no approval/governance layer; using those words would imply machinery that doesn't exist.
+- **"report"** — say **Action Packet** (or "packet"); "report" is vaguer and overloaded.
+- **"user"** — say **Operator** (the app user) or **Requester** (the message sender); "user" hides which one you mean.
+- **"client"** — ambiguous between the human Requester and a software SDK client; use **Requester** for the person.
+- **"OCR"** — only appears in the "OCR not supported in V1" note for unreadable scans.
 
-## 7. Storage
-This file (`docs/business-ontology.md`).
-
-## 8. Banned / must-clarify
-- **"agent"** — banned; this is one validated AI call.
-- **"approval", "escalation", "remediation", "resolution", "policy"** — banned (not in product).
-- **"report"** — use "Action Packet" / "packet."
-- **"user"** — prefer "Operator."
-- **"client"** — ambiguous; use **Requester** (sender) vs **Operator** (app user).
-- **"OCR"** — only in the "not supported V1" message.
-- **"workflow"** — only the pipeline (W1), not governance flows.
+## Storage
+This file: `docs/business-ontology.md`. Engineering-side names for these concepts (Service, Adapter, WorkflowRun row, etc.) are in `engineering-ontology.md`.

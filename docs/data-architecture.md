@@ -1,5 +1,7 @@
 # Data Architecture (Phase 9)
 
+Once the lease-renewal request is processed, where does the truth live? The packet content and the run record live in our SQLite database; the PDF lives on disk; the Drive folder and tracker row are *mirrors* owned by Google. If Google is off, nothing is lost — SQLite still holds everything. This doc maps the single source of truth for every piece of data so it's never ambiguous which copy is authoritative.
+
 ## 1. Data domains
 | Domain | Contents | Lifetime |
 |---|---|---|

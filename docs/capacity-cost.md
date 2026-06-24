@@ -1,5 +1,7 @@
 # Capacity, Scaling & Cost (Phase 14)
 
+Honest numbers for a one-person tool. Handling a single lease-style request costs roughly a dime in Claude tokens (less on Sonnet) and takes a handful of seconds, dominated by the AI call. This doc says what actually drives cost and latency, what stays simple on purpose, and what *not* to optimize until real usage demands it.
+
 Honest small-scale posture; no premature optimization.
 
 ## 1. V1 scale assumptions

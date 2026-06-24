@@ -1,5 +1,7 @@
 # Vertical Slice 01 — "Lease Renewal → Action Packet (local)" (Phase 15)
 
+This is the first thing to build and the proof the whole idea works: the lease-renewal request, end to end, with Google switched off — so the entire pipeline (read → structure → flag → Markdown → PDF → save → show) is proven with zero account setup. Filing to Drive/Sheets is the very next slice (01b).
+
 ## 1. Chosen slice
 One full **W1 Generate** run from the **Lease Renewal demo scenario** (no file upload needed), producing a validated packet + Markdown + PDF + `metadata.json`, persisted to SQLite, viewable on the Result page and listed in History — with **Google Drive/Sheets deliberately in `skipped`** (no OAuth setup required).
 

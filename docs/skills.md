@@ -1,5 +1,7 @@
 # Skills (Phase 7)
 
+The product has exactly one AI capability: read a messy request like the lease-renewal email and return a structured packet (summary, tasks, the Friday deadline, the unconfirmed $450 fee, the missing signing authority, a drafted reply). That single capability is the one "skill." This doc explains why it's **one** call that extracts everything at once, not a pipeline of separate agents for summarizing, drafting, and classifying.
+
 Right-sized: this system has exactly **one** skill. A skill is a workflow contract narrow enough to evaluate — not a vague capability. The full spec lives in [`skills/analyze-request/skill.md`](../skills/analyze-request/skill.md).
 
 ## Conventions

@@ -1,5 +1,7 @@
 # Implementation Phases / Build Order (Phase 18)
 
+The order to build it in, each stage runnable on its own — from an empty repo to the lease-renewal demo working locally (no Google needed), then layering on Drive/Sheets filing, then tests and polish. The goal is that the app is demoable as early as possible and never in a broken half-state.
+
 Each stage is independently runnable. Maps to the session task list.
 
 ## Stage 0 — Docs pack (P17) ✅

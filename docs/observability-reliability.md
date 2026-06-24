@@ -1,5 +1,7 @@
 # Observability & Reliability (Phase 12)
 
+When a lease-renewal request runs, you should be able to see what happened and trust the result. This doc covers what gets logged, how failures are sorted (a transient Claude error retries; a Drive outage just degrades to `skipped`/`failed` and the packet still ships), and the per-run record + `metadata.json` that let you reconstruct any past generation after the fact.
+
 Debuggability-focused; governance-audit dropped.
 
 ## 1. Observability (logging)

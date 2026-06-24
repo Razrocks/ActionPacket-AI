@@ -1,5 +1,7 @@
 # Tool Boundary & MCP Model (Phase 8)
 
+The model is handed zero tools. For the lease-renewal request it reads the text and returns JSON — it can't open a browser, run code, or touch Drive. Filing and tracking are done by our own code *after* the model returns. This doc states that boundary plainly (and why there's no MCP server in the picture): one request in, validated structure out.
+
 ## Tool surfaces
 **None exposed to the model.** The single Skill (`analyze-request`) uses zero tools — it is one structured-output call (`messages.parse` + `zodOutputFormat`), no tool-use loop, no sub-agents.
 

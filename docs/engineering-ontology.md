@@ -1,6 +1,10 @@
 # Engineering Ontology (Phase 2)
 
-Internal implementation vocab. Governance terms (policy rule, approval step, audit event, execution guard-as-policy) are intentionally absent.
+`business-ontology.md` named what the product means to a user (Request, Action Packet, Deadline). This doc names the code that implements it, so the codebase stays consistent.
+
+Trace the lease-renewal request through the system and you hit every term below: it arrives at a **route handler** (`/api/generate`), which hands it to the **orchestrator** (`workflowService`). The orchestrator calls **services** in order — extract the PDFs, then the one **skill** (the Claude call) that returns a packet, which must pass the **validation gate** (Zod) before anything trusts it. The orchestrator then renders the PDF, calls the Drive and Sheets **adapters** (each wrapped so a failure **degrades** to `skipped`/`failed` instead of crashing), and writes a **record** to the **store** (SQLite). All the while it emits **step events** to the browser. That whole runtime — route handlers + orchestrator + env access + degradation — is the **harness**.
+
+Governance terms (policy rule, approval step, audit event, execution guard-as-policy) are intentionally absent — this product has no such layer.
 
 ## 1. Glossary
 | Term | Meaning in this codebase | Lives in |
