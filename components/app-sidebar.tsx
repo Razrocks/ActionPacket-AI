@@ -23,7 +23,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { CONNECTIONS, connectedCount } from "@/lib/connections";
+import type { Connection } from "@/lib/connections";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -33,7 +33,7 @@ const NAV = [
   { href: "/connections", label: "Connections", icon: Plug },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ connections }: { connections: Connection[] }) {
   const pathname = usePathname();
 
   function isActive(href: string, exact?: boolean) {
@@ -88,7 +88,7 @@ export function AppSidebar() {
                 <Plug />
                 <span className="flex-1">Connections</span>
                 <span className="flex items-center gap-1">
-                  {CONNECTIONS.map((c) => (
+                  {connections.map((c) => (
                     <span
                       key={c.id}
                       className={cn(
@@ -98,7 +98,7 @@ export function AppSidebar() {
                     />
                   ))}
                   <span className="ml-1 text-xs text-muted-foreground">
-                    {connectedCount()}/{CONNECTIONS.length}
+                    {connections.filter((c) => c.connected).length}/{connections.length}
                   </span>
                 </span>
               </Link>

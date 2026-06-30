@@ -9,8 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CONNECTIONS, type ConnectionId } from "@/lib/connections";
+import { type ConnectionId } from "@/lib/connections";
+import { getConnections } from "@/lib/connections.server";
 import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const ICONS: Record<ConnectionId, React.ComponentType<{ className?: string }>> = {
   anthropic: Bot,
@@ -19,6 +22,7 @@ const ICONS: Record<ConnectionId, React.ComponentType<{ className?: string }>> =
 };
 
 export default function ConnectionsPage() {
+  const connections = getConnections();
   return (
     <div className="space-y-6">
       <PageHeader
@@ -27,7 +31,7 @@ export default function ConnectionsPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {CONNECTIONS.map((c) => {
+        {connections.map((c) => {
           const Icon = ICONS[c.id];
           return (
             <Card key={c.id}>

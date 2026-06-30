@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AttentionBadge, PacketTypeBadge, PriorityBadge } from "@/components/status-pills";
-import { CONNECTIONS, connectedCount } from "@/lib/connections";
+import { getConnections, connectedCount } from "@/lib/connections.server";
 import { listRuns } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ export default function DashboardPage() {
     ? Math.round((runs.reduce((a, r) => a + r.confidence, 0) / total) * 100)
     : 0;
   const recent = runs.slice(0, 4);
+  const connections = getConnections();
 
   return (
     <div className="space-y-6">
@@ -46,7 +47,7 @@ export default function DashboardPage() {
         <StatCard
           icon={Plug}
           label="Connections"
-          value={`${connectedCount()}/${CONNECTIONS.length}`}
+          value={`${connectedCount(connections)}/${connections.length}`}
         />
       </div>
 
@@ -95,7 +96,7 @@ export default function DashboardPage() {
             </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
-            {CONNECTIONS.map((c) => (
+            {connections.map((c) => (
               <div key={c.id} className="flex items-center gap-2.5 text-sm">
                 <span
                   className={cn(

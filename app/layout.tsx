@@ -8,11 +8,14 @@ import { AppTopbar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { getConnections } from "@/lib/connections.server";
 import { cn } from "@/lib/utils";
 
 const merriweather = Merriweather({ subsets: ["latin"], variable: "--font-serif" });
 const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "ActionPacket AI",
@@ -25,6 +28,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const connections = getConnections();
   return (
     <html
       lang="en"
@@ -41,9 +45,9 @@ export default function RootLayout({
         <ThemeProvider>
           <TooltipProvider delayDuration={300}>
             <SidebarProvider>
-              <AppSidebar />
+              <AppSidebar connections={connections} />
               <SidebarInset>
-                <AppTopbar />
+                <AppTopbar connections={connections} />
                 <div className="flex flex-1 flex-col p-4 md:p-6">
                   <div className="mx-auto w-full max-w-5xl">{children}</div>
                 </div>

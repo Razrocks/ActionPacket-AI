@@ -1,10 +1,10 @@
-import { CONNECTIONS } from "@/lib/connections";
+import type { Connection } from "@/lib/connections";
 import { cn } from "@/lib/utils";
 
-export function ConnectionPills() {
+export function ConnectionPills({ connections }: { connections: Connection[] }) {
   return (
     <div className="hidden items-center gap-3 sm:flex">
-      {CONNECTIONS.map((c) => (
+      {connections.map((c) => (
         <span
           key={c.id}
           title={`${c.name}: ${c.connected ? "connected" : "not connected"}`}

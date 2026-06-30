@@ -1,48 +1,44 @@
-// Integration connection state. Mock for now; later derived server-side from env
-// (ANTHROPIC_API_KEY present, Google OAuth configured) via the adapters' isConfigured().
+// Static connection metadata (safe to import anywhere, incl. client components).
+// Live status is computed server-side in connections.server.ts from env.
 
 export type ConnectionId = "anthropic" | "drive" | "sheets";
 
-export interface Connection {
+export interface ConnectionMeta {
   id: ConnectionId;
   name: string;
   shortLabel: string;
-  connected: boolean;
   required: boolean;
   detail: string;
   envHint: string;
 }
 
-export const CONNECTIONS: Connection[] = [
+export interface Connection extends ConnectionMeta {
+  connected: boolean;
+}
+
+export const CONNECTION_META: ConnectionMeta[] = [
   {
     id: "anthropic",
     name: "Anthropic (Claude)",
     shortLabel: "Claude",
-    connected: true,
     required: true,
-    detail: "API key configured. Powers the structured analysis.",
+    detail: "Powers the structured analysis. Without it, generation can't run.",
     envHint: "ANTHROPIC_API_KEY",
   },
   {
     id: "drive",
     name: "Google Drive",
     shortLabel: "Drive",
-    connected: false,
     required: false,
-    detail: "Not connected — packets won't be filed to a Drive folder (steps will be skipped).",
+    detail: "Files each packet into a dated Drive folder. Skipped when not connected.",
     envHint: "GOOGLE_OAUTH_REFRESH_TOKEN",
   },
   {
     id: "sheets",
     name: "Google Sheets",
     shortLabel: "Sheets",
-    connected: false,
     required: false,
-    detail: "Not connected — the tracker row append is disabled (skipped).",
+    detail: "Appends a tracker row per packet. Needs Drive auth plus a sheet ID.",
     envHint: "GOOGLE_SHEETS_ID",
   },
 ];
-
-export function connectedCount(): number {
-  return CONNECTIONS.filter((c) => c.connected).length;
-}

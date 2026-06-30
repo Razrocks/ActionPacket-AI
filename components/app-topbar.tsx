@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ConnectionPills } from "@/components/connection-pills";
+import type { Connection } from "@/lib/connections";
 
 const TITLES: Record<string, string> = {
   "/": "Dashboard",
@@ -23,7 +24,7 @@ const TITLES: Record<string, string> = {
   "/connections": "Connections",
 };
 
-export function AppTopbar() {
+export function AppTopbar({ connections }: { connections: Connection[] }) {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const title = TITLES[pathname] ?? (pathname.startsWith("/result") ? "Result" : "ActionPacket AI");
@@ -43,7 +44,7 @@ export function AppTopbar() {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-3">
-        <ConnectionPills />
+        <ConnectionPills connections={connections} />
         <Button
           variant="ghost"
           size="icon-sm"
