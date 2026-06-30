@@ -63,7 +63,6 @@ The engineering choices that make it reliable rather than a thin prompt-wrapper:
 - **Graceful degradation.** Drive, Sheets, and even PDF rendering are best-effort: if Google isn't connected or a call fails, that step is marked `skipped`/`failed` and the packet still ships. One integration outage never collapses the run.
 - **Durable, auditable record.** Every generation is persisted to SQLite (the source of truth) with a portable `metadata.json` snapshot, independent of Google.
 
-It demonstrates real AI software development end-to-end: unstructured intake, document parsing, Claude-powered structured extraction, schema validation, artifact generation, multi-service integration (Drive + Sheets via OAuth), and a streamed, fault-tolerant workflow — wrapped in a polished SaaS UI.
 
 ## Architecture & design docs
 
