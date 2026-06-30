@@ -6,8 +6,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
 import { computeAttention } from "@/lib/attention";
-import { SCHEMA_VERSION } from "@/lib/constants";
+import { PACKET_TYPE_LABELS, SCHEMA_VERSION } from "@/lib/constants";
 import { saveRun } from "@/lib/db";
+import { googleConfigured } from "@/lib/env";
 import type { ActionPacket, IntakeInput } from "@/lib/schema";
 import type { IntegrationStatus, StepKey } from "@/lib/types";
 import { analyzeRequest } from "@/services/claudeAnalysisService";
@@ -19,6 +20,8 @@ import {
 } from "@/services/fileExtractionService";
 import { generateMarkdown } from "@/services/packetGenerationService";
 import { renderPdf, runStorageDir } from "@/services/pdfService";
+import { fileGenerationToDrive } from "@/services/googleDriveService";
+import { appendTrackerRow, sheetsConfigured } from "@/services/googleSheetsService";
 
 export type WorkflowEvent =
   | { type: "step"; key: StepKey; status: "running" | "ok" | "skipped" | "failed" }
@@ -99,15 +102,48 @@ export async function* runGeneration(
       yield { type: "step", key: "pdf", status: "failed" };
     }
 
-    // 6. Drive filing (Stage 8 — currently skipped)
+    // 6. Drive filing (degrade on failure / skip if not configured)
     yield { type: "step", key: "drive", status: "running" };
-    const driveStatus: IntegrationStatus = "skipped";
-    const driveFolderUrl: string | undefined = undefined;
+    let driveStatus: IntegrationStatus = "skipped";
+    let driveFolderUrl: string | undefined;
+    if (googleConfigured()) {
+      try {
+        const owner = input.projectName || input.requester || "Untitled";
+        const folderName = `${owner} - ${packet.title} - ${createdAt.slice(0, 10)}`.slice(0, 200);
+        const r = await fileGenerationToDrive(folderName, dir);
+        driveFolderUrl = r.folderUrl;
+        driveStatus = "ok";
+      } catch {
+        driveStatus = "failed";
+      }
+    }
     yield { type: "step", key: "drive", status: driveStatus };
 
-    // 7. Sheets tracking (Stage 8 — currently skipped)
+    // 7. Sheets tracking (degrade on failure / skip if not configured)
     yield { type: "step", key: "sheets", status: "running" };
-    const sheetStatus: IntegrationStatus = "skipped";
+    let sheetStatus: IntegrationStatus = "skipped";
+    if (googleConfigured() && sheetsConfigured()) {
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
+        await appendTrackerRow({
+          createdAt,
+          title: packet.title,
+          requester: packet.requester ?? "",
+          projectName: packet.projectName ?? "",
+          packetType: PACKET_TYPE_LABELS[packet.packetType],
+          priority: packet.priority,
+          mainDeadline: mainDeadline(packet) ?? "",
+          needsAttention: packet.needsAttention,
+          confidence: packet.confidence,
+          status: "Generated",
+          driveFolderUrl: driveFolderUrl ?? "",
+          pdfLink: `${appUrl}/api/download/${runId}`,
+        });
+        sheetStatus = "ok";
+      } catch {
+        sheetStatus = "failed";
+      }
+    }
     yield { type: "step", key: "sheets", status: sheetStatus };
 
     // metadata.json snapshot (portable trace)

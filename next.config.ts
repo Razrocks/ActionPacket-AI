@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     root: import.meta.dirname,
   },
   // Native/binary deps used by the backend (added in later stages) must not be bundled.
-  serverExternalPackages: ["better-sqlite3", "puppeteer", "pdf-parse", "mammoth"],
+  serverExternalPackages: ["better-sqlite3", "puppeteer", "pdf-parse", "mammoth", "googleapis"],
 };
 
 export default nextConfig;
