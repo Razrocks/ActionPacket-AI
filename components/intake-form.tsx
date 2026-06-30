@@ -27,10 +27,10 @@ export function IntakeForm({
   onSubmit,
 }: {
   values: IntakeInput;
-  files: string[];
+  files: File[];
   disabled?: boolean;
   onChange: (patch: Partial<IntakeInput>) => void;
-  onFilesChange: (files: string[]) => void;
+  onFilesChange: (files: File[]) => void;
   onSubmit: () => void;
 }) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -38,8 +38,9 @@ export function IntakeForm({
 
   function handleFiles(list: FileList | null) {
     if (!list) return;
-    const names = Array.from(list).map((f) => f.name);
-    onFilesChange([...new Set([...files, ...names])].slice(0, 5));
+    const map = new Map(files.map((f) => [f.name, f]));
+    for (const f of Array.from(list)) map.set(f.name, f);
+    onFilesChange(Array.from(map.values()).slice(0, 5));
   }
 
   return (
@@ -139,16 +140,16 @@ export function IntakeForm({
               e.target.value = "";
             }}
           />
-          {files.map((name) => (
+          {files.map((file) => (
             <span
-              key={name}
+              key={file.name}
               className="inline-flex items-center gap-1 rounded-md border bg-muted/50 py-1 pr-1 pl-2 text-xs"
             >
-              {name}
+              {file.name}
               <button
                 type="button"
                 disabled={disabled}
-                onClick={() => onFilesChange(files.filter((f) => f !== name))}
+                onClick={() => onFilesChange(files.filter((f) => f !== file))}
                 className="rounded p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="size-3" />

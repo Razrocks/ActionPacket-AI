@@ -18,16 +18,16 @@ import {
   PacketTypeBadge,
   PriorityBadge,
 } from "@/components/status-pills";
-import { MOCK_RUNS } from "@/lib/mock-data";
+import { listRuns } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 
+export const dynamic = "force-dynamic";
+
 export default function HistoryPage() {
+  const runs = listRuns();
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="History"
-        description="Every generated action packet. Mock data — wired to the tracker later."
-      >
+      <PageHeader title="History" description="Every action packet you've generated.">
         <Button asChild>
           <Link href="/new">
             <Plus />
@@ -36,7 +36,7 @@ export default function HistoryPage() {
         </Button>
       </PageHeader>
 
-      {MOCK_RUNS.length === 0 ? (
+      {runs.length === 0 ? (
         <Card className="flex flex-col items-center gap-2 py-12 text-center">
           <Inbox className="size-6 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No packets yet.</p>
@@ -60,7 +60,7 @@ export default function HistoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_RUNS.map((run) => (
+              {runs.map((run) => (
                 <TableRow key={run.id} className="group">
                   <TableCell>
                     <div className="font-medium">{run.title}</div>

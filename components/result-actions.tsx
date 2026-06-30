@@ -1,20 +1,24 @@
 "use client";
 
 import { Download, ExternalLink } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
-export function DownloadPdfButton() {
+export function DownloadPdfButton({ id, available }: { id: string; available: boolean }) {
+  if (!available) {
+    return (
+      <Button variant="outline" size="sm" className="w-full" disabled>
+        <Download />
+        PDF unavailable
+      </Button>
+    );
+  }
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      className="w-full"
-      onClick={() => toast.info("PDF generation is wired in a later step (mock UI).")}
-    >
-      <Download />
-      Download PDF
+    <Button asChild variant="outline" size="sm" className="w-full">
+      <a href={`/api/download/${id}`} target="_blank" rel="noopener noreferrer">
+        <Download />
+        Download PDF
+      </a>
     </Button>
   );
 }

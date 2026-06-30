@@ -13,17 +13,20 @@ import {
 } from "@/components/ui/card";
 import { AttentionBadge, PacketTypeBadge, PriorityBadge } from "@/components/status-pills";
 import { CONNECTIONS, connectedCount } from "@/lib/connections";
-import { MOCK_RUNS } from "@/lib/mock-data";
+import { listRuns } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
-  const total = MOCK_RUNS.length;
-  const attention = MOCK_RUNS.filter((r) => r.needsAttention).length;
+  const runs = listRuns();
+  const total = runs.length;
+  const attention = runs.filter((r) => r.needsAttention).length;
   const avgConfidence = total
-    ? Math.round((MOCK_RUNS.reduce((a, r) => a + r.confidence, 0) / total) * 100)
+    ? Math.round((runs.reduce((a, r) => a + r.confidence, 0) / total) * 100)
     : 0;
-  const recent = MOCK_RUNS.slice(0, 4);
+  const recent = runs.slice(0, 4);
 
   return (
     <div className="space-y-6">

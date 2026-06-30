@@ -14,10 +14,13 @@ import {
   PacketTypeBadge,
   PriorityBadge,
 } from "@/components/status-pills";
-import { getMockResult } from "@/lib/mock-data";
+import { notFound } from "next/navigation";
+import { getRun } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
 
 const ARTIFACTS = ["action-packet.pdf", "action-packet.md", "metadata.json"];
+
+export const dynamic = "force-dynamic";
 
 export default async function ResultPage({
   params,
@@ -25,7 +28,8 @@ export default async function ResultPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = getMockResult(id);
+  const result = getRun(id);
+  if (!result) notFound();
   const p = result.packet;
 
   return (
@@ -79,7 +83,7 @@ export default async function ResultPage({
             </CardHeader>
             <CardContent className="space-y-2">
               <CopyButton text={p.followUpDraft} label="Copy follow-up draft" className="w-full" />
-              <DownloadPdfButton />
+              <DownloadPdfButton id={result.id} available={result.pdfStatus === "ok"} />
               <OpenDriveButton url={result.driveFolderUrl} />
             </CardContent>
           </Card>
