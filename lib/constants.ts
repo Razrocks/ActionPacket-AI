@@ -1,6 +1,16 @@
 // Deterministic limits + labels used across the pipeline and UI.
+import type { PacketType } from "@/lib/schema";
 
 export const SCHEMA_VERSION = 1;
+
+export const PACKET_TYPE_LABELS: Record<PacketType, string> = {
+  client_request: "Client Request",
+  invoice_or_payment: "Invoice / Payment",
+  contract_or_agreement: "Contract / Agreement",
+  event_coordination: "Event Coordination",
+  website_or_project_update: "Website / Project Update",
+  general_operations: "General Operations",
+};
 export const DEFAULT_MODEL = "claude-opus-4-8";
 
 // Upload safety (enforced server-side before extraction).
