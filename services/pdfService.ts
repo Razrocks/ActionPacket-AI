@@ -24,7 +24,7 @@ export async function renderPdf(runId: string, markdown: string, title: string):
   });
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, { waitUntil: "load" });
     const pdfPath = path.join(dir, "action-packet.pdf");
     await page.pdf({
       path: pdfPath,
